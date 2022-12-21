@@ -2,16 +2,12 @@ import json
 import logging
 import platform
 import time
-
 import torch.distributed as dist
-
-from fedml import mlops
 from fedml.constants import FEDML_CROSS_SILO_SCENARIO_HIERARCHICAL
 from .message_define import MyMessage
 from .utils import convert_model_params_from_ddp, convert_model_params_to_ddp
 from ...core.distributed.fedml_comm_manager import FedMLCommManager
 from ...core.distributed.communication.message import Message
-from ...core.mlops.mlops_profiler_event import MLOpsProfilerEvent
 
 
 class ClientMasterManager(FedMLCommManager):
@@ -52,8 +48,6 @@ class ClientMasterManager(FedMLCommManager):
         if not self.has_sent_online_msg:
             self.has_sent_online_msg = True
             self.send_client_status(0)
-
-            mlops.log_sys_perf(self.args)
 
     def handle_message_check_status(self, msg_params):
         self.send_client_status(0)
@@ -100,7 +94,6 @@ class ClientMasterManager(FedMLCommManager):
 
     def cleanup(self):
         self.finish()
-        mlops.log_training_finished_status()
 
     def send_model_to_server(self, receive_id, weights, local_sample_num):
         tick = time.time()
@@ -111,9 +104,6 @@ class ClientMasterManager(FedMLCommManager):
         self.send_message(message)
 
         MLOpsProfilerEvent.log_to_wandb({"Communication/Send_Total": time.time() - tick})
-        mlops.log_client_model_info(
-            self.round_idx+1, model_url=message.get(MyMessage.MSG_ARG_KEY_MODEL_PARAMS_URL),
-        )
 
     def send_client_status(self, receive_id, status="ONLINE"):
         logging.info("send_client_status")
