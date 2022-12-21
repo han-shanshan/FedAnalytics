@@ -1,8 +1,0 @@
-protobuf
-grpcio
-grpcio-tools
-dill
-multiprocess
-nvidia-ml-py3
-matplotlib
-pandas
