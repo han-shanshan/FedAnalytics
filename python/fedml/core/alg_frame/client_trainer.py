@@ -10,19 +10,18 @@ class ClientTrainer(ABC):
     """
 
     def __init__(self, model, args):
-        self.model = model
+        # self.model = model
+        self.local_answer = 0
         self.id = 0
         self.args = args
         self.local_train_dataset = None
-        self.local_test_dataset = None
         self.local_sample_number = 0
 
     def set_id(self, trainer_id):
         self.id = trainer_id
 
-    def update_dataset(self, local_train_dataset, local_test_dataset, local_sample_number):
+    def update_dataset(self, local_train_dataset, local_sample_number):
         self.local_train_dataset = local_train_dataset
-        self.local_test_dataset = local_test_dataset
         self.local_sample_number = local_sample_number
 
     @abstractmethod
@@ -37,7 +36,7 @@ class ClientTrainer(ABC):
         pass
 
     @abstractmethod
-    def train(self, train_data, device, args):
+    def train(self, train_data, args):
         pass
 
     def on_after_local_training(self, train_data, device, args):

@@ -21,32 +21,6 @@ def make_dir(file_path):
         return False
 
 
-def download_s3_file(s3, BUCKET_NAME, edge_id, path_s3, root, path_local):
-    """
-    download file
-    :param path_s3: s3 key
-    :param path_local: local path
-    :return:
-    """
-    retry = 0
-    while retry < 3:
-        # retry 3 times
-        logging.info(f'Start downloading files. | path_s3: {path_s3} | path_local: {path_local}')
-        try:
-            with open(path_local, 'wb') as data:
-                s3.download_fileobj(BUCKET_NAME, path_s3, data)
-            file_size = os.path.getsize(path_local)
-            logging.info(f'Downloading completed. | size: {round(file_size / 1048576, 2)} MB')
-            file_extract(root, path_local)
-            move_file(edge_id, root)
-            break
-        except Exception as e:
-            logging.error(f'Download zip failed. | Exception: {e}')
-            retry += 1
-    if retry >= 3:
-        logging.error(f'Download zip failed after max retry.')
-
-
 def check_is_download(path):
     if os.path.isdir(path):
         logging.info(f'Edge Data exist.')

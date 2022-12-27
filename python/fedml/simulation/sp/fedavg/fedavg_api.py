@@ -1,43 +1,29 @@
 import copy
 import logging
 import random
-
 import numpy as np
 import torch
-import wandb
-
-from fedml import mlops
-from fedml.ml.trainer.trainer_creator import create_model_trainer
 from .client import Client
 
 
 class FedAvgAPI(object):
-    def __init__(self, args, device, dataset, model):
+    def __init__(self, args, device, dataset, task):
         self.device = device
         self.args = args
         [
             train_data_num,
-            test_data_num,
-            train_data_global,
-            test_data_global,
             train_data_local_num_dict,
             train_data_local_dict,
-            test_data_local_dict,
-            class_num,
         ] = dataset
 
-        self.train_global = train_data_global
-        self.test_global = test_data_global
         self.val_global = None
         self.train_data_num_in_total = train_data_num
-        self.test_data_num_in_total = test_data_num
 
         self.client_list = []
         self.train_data_local_num_dict = train_data_local_num_dict
         self.train_data_local_dict = train_data_local_dict
-        self.test_data_local_dict = test_data_local_dict
 
-        logging.info("model = {}".format(model))
+        logging.info("model = {}".format(task))
         self.model_trainer = create_model_trainer(model, args)
         self.model = model
         logging.info("self.model_trainer = {}".format(self.model_trainer))
@@ -172,113 +158,3 @@ class FedAvgAPI(object):
                 temp_w.append(local_w[k])
             averaged_params[k] = sum(temp_w) / len(temp_w)
         return averaged_params
-
-    def _local_test_on_all_clients(self, round_idx):
-
-        logging.info("################local_test_on_all_clients : {}".format(round_idx))
-
-        train_metrics = {"num_samples": [], "num_correct": [], "losses": []}
-
-        test_metrics = {"num_samples": [], "num_correct": [], "losses": []}
-
-        client = self.client_list[0]
-
-        for client_idx in range(self.args.client_num_in_total):
-            """
-            Note: for datasets like "fed_CIFAR100" and "fed_shakespheare",
-            the training client number is larger than the testing client number
-            """
-            if self.test_data_local_dict[client_idx] is None:
-                continue
-            client.update_local_dataset(
-                0,
-                self.train_data_local_dict[client_idx],
-                self.test_data_local_dict[client_idx],
-                self.train_data_local_num_dict[client_idx],
-            )
-            # train data
-            train_local_metrics = client.local_test(False)
-            train_metrics["num_samples"].append(copy.deepcopy(train_local_metrics["test_total"]))
-            train_metrics["num_correct"].append(copy.deepcopy(train_local_metrics["test_correct"]))
-            train_metrics["losses"].append(copy.deepcopy(train_local_metrics["test_loss"]))
-
-            # test data
-            test_local_metrics = client.local_test(True)
-            test_metrics["num_samples"].append(copy.deepcopy(test_local_metrics["test_total"]))
-            test_metrics["num_correct"].append(copy.deepcopy(test_local_metrics["test_correct"]))
-            test_metrics["losses"].append(copy.deepcopy(test_local_metrics["test_loss"]))
-
-        # test on training dataset
-        train_acc = sum(train_metrics["num_correct"]) / sum(train_metrics["num_samples"])
-        train_loss = sum(train_metrics["losses"]) / sum(train_metrics["num_samples"])
-
-        # test on test dataset
-        test_acc = sum(test_metrics["num_correct"]) / sum(test_metrics["num_samples"])
-        test_loss = sum(test_metrics["losses"]) / sum(test_metrics["num_samples"])
-
-        stats = {"training_acc": train_acc, "training_loss": train_loss}
-        if self.args.enable_wandb:
-            wandb.log({"Train/Acc": train_acc, "round": round_idx})
-            wandb.log({"Train/Loss": train_loss, "round": round_idx})
-
-        mlops.log({"Train/Acc": train_acc, "round": round_idx})
-        mlops.log({"Train/Loss": train_loss, "round": round_idx})
-        logging.info(stats)
-
-        stats = {"test_acc": test_acc, "test_loss": test_loss}
-        if self.args.enable_wandb:
-            wandb.log({"Test/Acc": test_acc, "round": round_idx})
-            wandb.log({"Test/Loss": test_loss, "round": round_idx})
-
-        mlops.log({"Test/Acc": test_acc, "round": round_idx})
-        mlops.log({"Test/Loss": test_loss, "round": round_idx})
-        logging.info(stats)
-
-    def _local_test_on_validation_set(self, round_idx):
-
-        logging.info("################local_test_on_validation_set : {}".format(round_idx))
-
-        if self.val_global is None:
-            self._generate_validation_set()
-
-        client = self.client_list[0]
-        client.update_local_dataset(0, None, self.val_global, None)
-        # test data
-        test_metrics = client.local_test(True)
-
-        if self.args.dataset == "stackoverflow_nwp":
-            test_acc = test_metrics["test_correct"] / test_metrics["test_total"]
-            test_loss = test_metrics["test_loss"] / test_metrics["test_total"]
-            stats = {"test_acc": test_acc, "test_loss": test_loss}
-            if self.args.enable_wandb:
-                wandb.log({"Test/Acc": test_acc, "round": round_idx})
-                wandb.log({"Test/Loss": test_loss, "round": round_idx})
-
-            mlops.log({"Test/Acc": test_acc, "round": round_idx})
-            mlops.log({"Test/Loss": test_loss, "round": round_idx})
-
-        elif self.args.dataset == "stackoverflow_lr":
-            test_acc = test_metrics["test_correct"] / test_metrics["test_total"]
-            test_pre = test_metrics["test_precision"] / test_metrics["test_total"]
-            test_rec = test_metrics["test_recall"] / test_metrics["test_total"]
-            test_loss = test_metrics["test_loss"] / test_metrics["test_total"]
-            stats = {
-                "test_acc": test_acc,
-                "test_pre": test_pre,
-                "test_rec": test_rec,
-                "test_loss": test_loss,
-            }
-            if self.args.enable_wandb:
-                wandb.log({"Test/Acc": test_acc, "round": round_idx})
-                wandb.log({"Test/Pre": test_pre, "round": round_idx})
-                wandb.log({"Test/Rec": test_rec, "round": round_idx})
-                wandb.log({"Test/Loss": test_loss, "round": round_idx})
-
-            mlops.log({"Test/Acc": test_acc, "round": round_idx})
-            mlops.log({"Test/Pre": test_pre, "round": round_idx})
-            mlops.log({"Test/Rec": test_rec, "round": round_idx})
-            mlops.log({"Test/Loss": test_loss, "round": round_idx})
-        else:
-            raise Exception("Unknown format to log metrics for dataset {}!" % self.args.dataset)
-
-        logging.info(stats)

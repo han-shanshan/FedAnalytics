@@ -1,6 +1,5 @@
 from .constants import (
     FEDML_TRAINING_PLATFORM_SIMULATION,
-    FEDML_TRAINING_PLATFORM_CROSS_SILO,
     FEDML_SIMULATION_TYPE_MPI,
     FEDML_SIMULATION_TYPE_SP,
 )
@@ -13,63 +12,40 @@ class FedMLRunner:
         args,
         device,
         dataset,
-        model,
+        task,
         client_trainer: ClientTrainer = None,
         server_aggregator: ServerAggregator = None,
     ):
 
         if args.training_type == FEDML_TRAINING_PLATFORM_SIMULATION:
             init_runner_func = self._init_simulation_runner
-        elif args.training_type == FEDML_TRAINING_PLATFORM_CROSS_SILO:
-            init_runner_func = self._init_cross_silo_runner
         else:
             raise Exception("no such setting")
 
         self.runner = init_runner_func(
-            args, device, dataset, model, client_trainer, server_aggregator
+            args, device, dataset, task, client_trainer, server_aggregator
         )
 
     def _init_simulation_runner(
-        self, args, device, dataset, model, client_trainer=None, server_aggregator=None
+        self, args, device, dataset, task, client_trainer=None, server_aggregator=None
     ):
         if hasattr(args, "backend") and args.backend == FEDML_SIMULATION_TYPE_SP:
             from .simulation.simulator import SimulatorSingleProcess
 
             runner = SimulatorSingleProcess(
-                args, device, dataset, model, client_trainer, server_aggregator
+                args, device, dataset, task, client_trainer, server_aggregator
             )
         elif hasattr(args, "backend") and args.backend == FEDML_SIMULATION_TYPE_MPI:
             from .simulation.simulator import SimulatorMPI
 
             runner = SimulatorMPI(
-                args, device, dataset, model, client_trainer, server_aggregator
+                args, device, dataset, task, client_trainer, server_aggregator
             )
         else:
             raise Exception("not such backend {}".format(args.backend))
 
         return runner
 
-    def _init_cross_silo_runner(
-        self, args, device, dataset, model, client_trainer=None, server_aggregator=None
-    ):
-        if args.scenario == "horizontal":
-            if args.role == "client":
-                from .cross_silo import Client
-
-                runner = Client(
-                    args, device, dataset, model, client_trainer
-                )
-            elif args.role == "server":
-                from .cross_silo import Server
-
-                runner = Server(
-                    args, device, dataset, model, server_aggregator
-                )
-            else:
-                raise Exception("no such role")
-        else:
-            raise Exception("no such setting")
-        return runner
 
     def run(self):
         self.runner.run()
