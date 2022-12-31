@@ -1,14 +1,24 @@
-import copy
 import logging
-import random
 import numpy as np
-import torch
+from python.fedml.constants import FA_TASK_AVG
+from python.fedml.ml.trainer.trainer_creator import create_model_trainer
 from .client import Client
 
 
+""" todo: 
+Mode 1: (online mode) each client stores its AVG result and the total number of data being sampled so far; 
+later computation will use this result.
+Mode 2: (offline mode, no need to use iterations) clients do not store previous results; 
+server collects results from clients and does a weighted avg each round.
+Finally, server does a weighted avg for all rounds.
+Mode 3: (online mode, server does not need to store avg results for each rounds, the clients do not store their answers) 
+similar to fl, the server sends the AVG result & total sample num so far to each client; 
+(or, AVG result + cdp && a fake total sample num, the server can do further computation to get the real answer)
+Mode 4: (online mode) server sets 2 local var: avg and total sample num. The server collects answers from clients each round and compute AVG
+using avg, total sample num, and training num of the current round
+"""
 class FedAvgAPI(object):
-    def __init__(self, args, device, dataset, task):
-        self.device = device
+    def __init__(self, args, dataset):
         self.args = args
         [
             train_data_num,
@@ -16,34 +26,27 @@ class FedAvgAPI(object):
             train_data_local_dict,
         ] = dataset
 
-        self.val_global = None
         self.train_data_num_in_total = train_data_num
-
         self.client_list = []
         self.train_data_local_num_dict = train_data_local_num_dict
         self.train_data_local_dict = train_data_local_dict
-
-        logging.info("model = {}".format(task))
-        self.model_trainer = create_model_trainer(model, args)
-        self.model = model
-        logging.info("self.model_trainer = {}".format(self.model_trainer))
-
+        self.model_trainer = create_model_trainer(FA_TASK_AVG, args)
         self._setup_clients(
-            train_data_local_num_dict, train_data_local_dict, test_data_local_dict, self.model_trainer,
+            train_data_local_num_dict, train_data_local_dict, self.model_trainer,
         )
+        self.w_global = 0.0
+        self.total_sample_num = 0
 
     def _setup_clients(
-        self, train_data_local_num_dict, train_data_local_dict, test_data_local_dict, model_trainer,
+        self, train_data_local_num_dict, train_data_local_dict, model_trainer,
     ):
         logging.info("############setup_clients (START)#############")
         for client_idx in range(self.args.client_num_per_round):
             c = Client(
                 client_idx,
                 train_data_local_dict[client_idx],
-                test_data_local_dict[client_idx],
                 train_data_local_num_dict[client_idx],
                 self.args,
-                self.device,
                 model_trainer,
             )
             self.client_list.append(c)
@@ -51,14 +54,9 @@ class FedAvgAPI(object):
 
     def train(self):
         logging.info("self.model_trainer = {}".format(self.model_trainer))
-        w_global = self.model_trainer.get_model_params()
-        mlops.log_training_status(mlops.ClientConstants.MSG_MLOPS_CLIENT_STATUS_TRAINING)
-        mlops.log_aggregation_status(mlops.ServerConstants.MSG_MLOPS_SERVER_STATUS_RUNNING)
-        mlops.log_round_info(self.args.comm_round, -1)
+        # w_global = self.model_trainer.get_model_params()
         for round_idx in range(self.args.comm_round):
-
             logging.info("################Communication round : {}".format(round_idx))
-
             w_locals = []
 
             """
@@ -69,46 +67,19 @@ class FedAvgAPI(object):
                 round_idx, self.args.client_num_in_total, self.args.client_num_per_round
             )
             logging.info("client_indexes = " + str(client_indexes))
-
             for idx, client in enumerate(self.client_list):
                 # update dataset
                 client_idx = client_indexes[idx]
                 client.update_local_dataset(
                     client_idx,
                     self.train_data_local_dict[client_idx],
-                    self.test_data_local_dict[client_idx],
                     self.train_data_local_num_dict[client_idx],
                 )
-
                 # train on new dataset
-                mlops.event("train", event_started=True, event_value="{}_{}".format(str(round_idx), str(idx)))
-                w = client.train(copy.deepcopy(w_global))
-                mlops.event("train", event_started=False, event_value="{}_{}".format(str(round_idx), str(idx)))
-                # self.logging.info("local weights = " + str(w))
-                w_locals.append((client.get_sample_number(), copy.deepcopy(w)))
-
+                w = client.train(w_global=None)
+                w_locals.append((client.get_sample_number(), w))
             # update global weights
-            mlops.event("agg", event_started=True, event_value=str(round_idx))
-            w_global = self._aggregate(w_locals)
-
-            self.model_trainer.set_model_params(w_global)
-            mlops.event("agg", event_started=False, event_value=str(round_idx))
-
-            # test results
-            # at last round
-            if round_idx == self.args.comm_round - 1:
-                self._local_test_on_all_clients(round_idx)
-            # per {frequency_of_the_test} round
-            elif round_idx % self.args.frequency_of_the_test == 0:
-                if self.args.dataset.startswith("stackoverflow"):
-                    self._local_test_on_validation_set(round_idx)
-                else:
-                    self._local_test_on_all_clients(round_idx)
-
-            mlops.log_round_info(self.args.comm_round, round_idx)
-
-        mlops.log_training_finished_status()
-        mlops.log_aggregation_finished_status()
+            self.w_global = self._aggregate(w_locals)
 
     def _client_sampling(self, round_idx, client_num_in_total, client_num_per_round):
         if client_num_in_total == client_num_per_round:
@@ -120,13 +91,6 @@ class FedAvgAPI(object):
         logging.info("client_indexes = %s" % str(client_indexes))
         return client_indexes
 
-    def _generate_validation_set(self, num_samples=10000):
-        test_data_num = len(self.test_global.dataset)
-        sample_indices = random.sample(range(test_data_num), min(num_samples, test_data_num))
-        subset = torch.utils.data.Subset(self.test_global.dataset, sample_indices)
-        sample_testset = torch.utils.data.DataLoader(subset, batch_size=self.args.batch_size)
-        self.val_global = sample_testset
-
     def _aggregate(self, w_locals):
         training_num = 0
         for idx in range(len(w_locals)):
@@ -134,27 +98,28 @@ class FedAvgAPI(object):
             training_num += sample_num
 
         (sample_num, averaged_params) = w_locals[0]
-        for k in averaged_params.keys():
-            for i in range(0, len(w_locals)):
-                local_sample_number, local_model_params = w_locals[i]
-                w = local_sample_number / training_num
-                if i == 0:
-                    averaged_params[k] = local_model_params[k] * w
-                else:
-                    averaged_params[k] += local_model_params[k] * w
+        for i in range(0, len(w_locals)):
+            local_sample_number, local_model_params = w_locals[i]
+            w = local_sample_number / training_num
+            if i == 0:
+                averaged_params = local_model_params * w
+            else:
+                averaged_params += local_model_params * w
+        self.total_sample_num += training_num
+        averaged_params = averaged_params * (training_num / self.total_sample_num) + self.w_global * ((self.total_sample_num - training_num)/self.total_sample_num)
         return averaged_params
 
-    def _aggregate_noniid_avg(self, w_locals):
-        """
-        The old aggregate method will impact the model performance when it comes to Non-IID setting
-        Args:
-            w_locals:
-        Returns:
-        """
-        (_, averaged_params) = w_locals[0]
-        for k in averaged_params.keys():
-            temp_w = []
-            for (_, local_w) in w_locals:
-                temp_w.append(local_w[k])
-            averaged_params[k] = sum(temp_w) / len(temp_w)
-        return averaged_params
+    # def _aggregate_noniid_avg(self, w_locals):
+    #     """
+    #     The old aggregate method will impact the model performance when it comes to Non-IID setting
+    #     Args:
+    #         w_locals:
+    #     Returns:
+    #     """
+    #     (_, averaged_params) = w_locals[0]
+    #     for k in averaged_params.keys():
+    #         temp_w = []
+    #         for (_, local_w) in w_locals:
+    #             temp_w.append(local_w[k])
+    #         averaged_params[k] = sum(temp_w) / len(temp_w)
+    #     return averaged_params

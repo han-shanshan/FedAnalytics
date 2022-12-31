@@ -9,9 +9,9 @@ class ClientTrainer(ABC):
     3. This class is an operator which does not cache any states inside.
     """
 
-    def __init__(self, model, args):
+    def __init__(self, args):
         # self.model = model
-        self.local_answer = 0
+        self.answer = 0
         self.id = 0
         self.args = args
         self.local_train_dataset = None

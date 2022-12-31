@@ -1,6 +1,5 @@
 from .constants import (
     FEDML_TRAINING_PLATFORM_SIMULATION,
-    FEDML_SIMULATION_TYPE_MPI,
     FEDML_SIMULATION_TYPE_SP,
 )
 from .core import ClientTrainer, ServerAggregator
@@ -10,9 +9,7 @@ class FedMLRunner:
     def __init__(
         self,
         args,
-        device,
         dataset,
-        task,
         client_trainer: ClientTrainer = None,
         server_aggregator: ServerAggregator = None,
     ):
@@ -23,29 +20,22 @@ class FedMLRunner:
             raise Exception("no such setting")
 
         self.runner = init_runner_func(
-            args, device, dataset, task, client_trainer, server_aggregator
+            args, dataset, client_trainer, server_aggregator
         )
 
     def _init_simulation_runner(
-        self, args, device, dataset, task, client_trainer=None, server_aggregator=None
+        self, args, dataset, client_trainer=None, server_aggregator=None
     ):
         if hasattr(args, "backend") and args.backend == FEDML_SIMULATION_TYPE_SP:
             from .simulation.simulator import SimulatorSingleProcess
 
             runner = SimulatorSingleProcess(
-                args, device, dataset, task, client_trainer, server_aggregator
-            )
-        elif hasattr(args, "backend") and args.backend == FEDML_SIMULATION_TYPE_MPI:
-            from .simulation.simulator import SimulatorMPI
-
-            runner = SimulatorMPI(
-                args, device, dataset, task, client_trainer, server_aggregator
+                args, dataset, client_trainer, server_aggregator
             )
         else:
             raise Exception("not such backend {}".format(args.backend))
 
         return runner
-
 
     def run(self):
         self.runner.run()
