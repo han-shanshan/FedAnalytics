@@ -1,4 +1,6 @@
 import logging
+import random
+
 import numpy as np
 
 from federated_analytics.constants import FA_TASK_AVG
@@ -23,30 +25,30 @@ class FedAvgAPI(object):
         self.args = args
         [
             train_data_num,
-            train_data_local_num_dict,
+            local_datasize_dict,
             train_data_local_dict,
         ] = dataset
 
         self.train_data_num_in_total = train_data_num
         self.client_list = []
-        self.train_data_local_num_dict = train_data_local_num_dict
+        self.local_datasize_dict = local_datasize_dict
         self.train_data_local_dict = train_data_local_dict
         self.model_trainer = create_model_trainer(FA_TASK_AVG, args)
         self._setup_clients(
-            train_data_local_num_dict, train_data_local_dict, self.model_trainer,
+            local_datasize_dict, train_data_local_dict, self.model_trainer,
         )
         self.w_global = 0.0
         self.total_sample_num = 0
 
     def _setup_clients(
-        self, train_data_local_num_dict, train_data_local_dict, model_trainer,
+        self, local_datasize_dict, train_data_local_dict, model_trainer,
     ):
         logging.info("############setup_clients (START)#############")
         for client_idx in range(self.args.client_num_per_round):
             c = Client(
                 client_idx,
                 train_data_local_dict[client_idx],
-                train_data_local_num_dict[client_idx],
+                local_datasize_dict[client_idx],
                 self.args,
                 model_trainer,
             )
@@ -56,6 +58,7 @@ class FedAvgAPI(object):
     def train(self):
         logging.info("self.model_trainer = {}".format(self.model_trainer))
         # w_global = self.model_trainer.get_model_params()
+        local_sample_num = dict()
         for round_idx in range(self.args.comm_round):
             logging.info("################Communication round : {}".format(round_idx))
             w_locals = []
@@ -67,20 +70,25 @@ class FedAvgAPI(object):
             client_indexes = self._client_sampling(
                 round_idx, self.args.client_num_in_total, self.args.client_num_per_round
             )
-            logging.info("client_indexes = " + str(client_indexes))
+            print(f"self.local_datasize_dict={self.local_datasize_dict}, local_sample_num={local_sample_num}")
+            for i in client_indexes:
+                local_sample_num[i] = random.randint(1, self.local_datasize_dict[i])
+
+            # logging.info("client_indexes = " + str(client_indexes))
             for idx, client in enumerate(self.client_list):
                 # update dataset
                 client_idx = client_indexes[idx]
                 client.update_local_dataset(
                     client_idx,
                     self.train_data_local_dict[client_idx],
-                    self.train_data_local_num_dict[client_idx],
+                    local_sample_num[client_idx]
                 )
                 # train on new dataset
                 w = client.train(w_global=None)
                 w_locals.append((client.get_sample_number(), w))
             # update global weights
             self.w_global = self._aggregate(w_locals)
+            print(f"round_idx={round_idx}, aggregation result = {self.w_global}")
 
     def _client_sampling(self, round_idx, client_num_in_total, client_num_per_round):
         if client_num_in_total == client_num_per_round:

@@ -17,7 +17,7 @@ if __name__ == "__main__":
     args = init()
 
     # load data
-    dataset = load(args)  # todo
+    dataset = load(args)
 
     # start training
     fa_runner = FedMLRunner(args, dataset)

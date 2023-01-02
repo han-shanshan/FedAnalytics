@@ -4,7 +4,7 @@ common_args:
 
 data_args:
   dataset: "fake"
-  data_cache_dir: ~/fedml_data
+  data_cache_dir: /data
 
 train_args:
   federated_optimizer: "FedAvg"

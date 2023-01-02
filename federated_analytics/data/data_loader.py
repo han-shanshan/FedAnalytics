@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import random
 
 
 def load(args):
@@ -8,33 +9,30 @@ def load(args):
 
 
 def generate_fake_data(data_cache_dir):
-    if not os.path.exists(data_cache_dir):
-        os.makedirs(data_cache_dir)
     file_path = data_cache_dir + "/fake.txt"
-    logging.info(file_path)
 
     if not os.path.exists(file_path):
         f = open(file_path, "a")
         for i in range(100):
-            f.write("1\n")
+            f.write(f"{random.randint(1, 100)}\n")
         f.close()
 
 
-def read_data(train_data_dir):
-    train_files = os.listdir(train_data_dir)
+def read_data(data_dir):
+    train_files = os.listdir(data_dir)
     train_files = [f for f in train_files if f.endswith(".txt")]
     dataset = []
     for f in train_files:
-        file_path = os.path.join(train_data_dir, f)
+        file_path = os.path.join(data_dir, f)
         f2 = open(file_path, "r")
         lines = [int(line.strip()) for line in f2]
         dataset.extend(lines)
     return dataset
 
 
-def load_partition_data_fake(args):
-    dataset = read_data(train_data_dir=args.data_cache_dir)
-    client_num = int(args.client_num_in_total)
+def load_partition_data_fake(data_dir, client_num_in_total):
+    dataset = read_data(data_dir=data_dir)
+    client_num = client_num_in_total
     client_data_num = int(len(dataset) / client_num)
     local_data_dict = dict()
     train_data_local_num_dict = dict()
@@ -55,20 +53,24 @@ def load_partition_data_fake(args):
 def load_synthetic_data(args):
     dataset_name = args.dataset
     if dataset_name == "fake":
-        generate_fake_data(args.data_cache_dir)
+        data_cache_dir = os.path.abspath(os.getcwd() + '/../../../federated_analytics' + args.data_cache_dir + "/fake_data")
+        if not os.path.exists(data_cache_dir):
+            os.makedirs(data_cache_dir)
+        print(f"---data_cache_dir={data_cache_dir}")
+        generate_fake_data(data_cache_dir)
         logging.info("load_data. dataset_name = %s" % dataset_name)
         (
             datasize,
             train_data_local_num_dict,
             local_data_dict,
-        ) = load_partition_data_fake(args)
+        ) = load_partition_data_fake(data_dir=data_cache_dir, client_num_in_total=int(args.client_num_in_total))
 
         dataset = [
             datasize,
             train_data_local_num_dict,
             local_data_dict,
         ]
-        print(dataset)
+        print(f"datasize, train_data_local_num_dict, local_data_dict,{dataset}")
         return dataset
 
 
