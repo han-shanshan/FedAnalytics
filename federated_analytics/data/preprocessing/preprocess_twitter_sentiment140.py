@@ -11,6 +11,8 @@ import re
 
 import numpy as np
 
+from federated_analytics.utils.trie import Trie
+
 
 def is_valid(word):
     if len(word) < 3 or (word[-1] in [
@@ -23,11 +25,11 @@ def is_valid(word):
 
 
 def get_clients(filename, dictionary):
-    import dict_trie
+    # import dict_trie
     """Returns a dictionary of dictionaries containing per client word frequencies."""
 
     # read dictionary file
-    vocab = dict_trie.Trie()
+    vocab = Trie()
     # with open(dictionary, 'r') as f:
     #     content = f.readlines()
     #     for x in content:
@@ -74,14 +76,15 @@ def add_end_symbol(word):
     return word + '$'
 
 
-def generate_triehh_clients(clients):
+def generate_triehh_clients(clients, path):
     clients_num = len(clients)
     triehh_clients = [add_end_symbol(clients[i]) for i in range(clients_num)]
     word_freq = collections.defaultdict(lambda: 0)
     for word in triehh_clients:
         word_freq[word] += 1
     word_freq = dict(word_freq)
-    with open('twitter_Sentiment140/clients_triehh.txt', 'wb') as fp:
+    file_path = os.path.join(path, 'clients_triehh.txt')
+    with open(file_path, 'wb') as fp:
         pickle.dump(triehh_clients, fp)
 
 
@@ -137,7 +140,7 @@ def preprocess_twitter_data(path):  # todo: remove @ at the beginning of the wor
         pickle.dump(top_word_frequencies, fp)
 
     generate_sfp_clients(clients_top_word, max_word_len)
-    generate_triehh_clients(clients_top_word)
+    generate_triehh_clients(clients_top_word, path=path)
 
     print('client count:', len(clients_top_word))
     print('top word count:', len(top_word_counts))

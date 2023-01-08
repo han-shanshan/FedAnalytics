@@ -3,14 +3,14 @@ common_args:
   random_seed: 0
 
 data_args:
-  dataset: "fake"
+  dataset: "twitter"
   data_cache_dir: /data
 
 train_args:
   client_num_in_total: 4
   client_num_per_round: 4
   comm_round: 10
-  task: "AVG"
+  task: "heavy_hitter"
 
 comm_args:
   backend: "sp"

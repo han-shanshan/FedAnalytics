@@ -2,6 +2,7 @@ import logging
 import math
 from federated_analytics.constants import FA_TASK_HEAVY_HITTER_TRIEHH
 from federated_analytics.ml.trainer.trainer_creator import create_model_trainer
+from federated_analytics.utils.trie import Trie
 from .client import Client
 from collections import defaultdict
 import numpy as np
@@ -41,7 +42,7 @@ class TrieHHAPI(object):
         self._setup_clients(
             local_datasize_dict, train_data_local_dict, self.model_trainer,
         )
-        self.w_global = {}  # self.trie = {}
+        self.w_global = Trie()  # self.trie = {}
         self.total_sample_num = 0
 
         self._set_theta()
@@ -101,6 +102,7 @@ class TrieHHAPI(object):
                 w_locals.extend(w)
             # update global weights
             self.w_global = self._aggregate(w_locals)
+            self.print_heavy_hitters()
             print(f"round_idx={round_idx}, aggregation result = {self.w_global}")
 
     def _aggregate(self, w_locals):
