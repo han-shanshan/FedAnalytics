@@ -8,7 +8,7 @@ import operator
 import os
 import pickle
 import re
-import dict_trie
+
 import numpy as np
 
 
@@ -23,6 +23,7 @@ def is_valid(word):
 
 
 def get_clients(filename, dictionary):
+    import dict_trie
     """Returns a dictionary of dictionaries containing per client word frequencies."""
 
     # read dictionary file
