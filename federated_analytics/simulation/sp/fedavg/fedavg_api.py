@@ -6,7 +6,7 @@ import numpy as np
 from federated_analytics.constants import FA_TASK_AVG
 from federated_analytics.ml.trainer.trainer_creator import create_model_trainer
 from .client import Client
-
+from ...utils import client_sampling
 
 """ todo: 
 Mode 1: (online mode) each client stores its AVG result and the total number of data being sampled so far; 
@@ -57,7 +57,6 @@ class FedAvgAPI(object):
 
     def train(self):
         logging.info("self.model_trainer = {}".format(self.model_trainer))
-        # w_global = self.model_trainer.get_model_params()
         local_sample_num = dict()
         for round_idx in range(self.args.comm_round):
             logging.info("################Communication round : {}".format(round_idx))
@@ -67,7 +66,7 @@ class FedAvgAPI(object):
             for scalability: following the original FedAvg algorithm, we uniformly sample a fraction of clients in each round.
             Instead of changing the 'Client' instances, our implementation keeps the 'Client' instances and then updates their local dataset 
             """
-            client_indexes = self._client_sampling(
+            client_indexes = client_sampling(
                 round_idx, self.args.client_num_in_total, self.args.client_num_per_round
             )
             print(f"self.local_datasize_dict={self.local_datasize_dict}, local_sample_num={local_sample_num}")
@@ -89,16 +88,6 @@ class FedAvgAPI(object):
             # update global weights
             self.w_global = self._aggregate(w_locals)
             print(f"round_idx={round_idx}, aggregation result = {self.w_global}")
-
-    def _client_sampling(self, round_idx, client_num_in_total, client_num_per_round):
-        if client_num_in_total == client_num_per_round:
-            client_indexes = [client_index for client_index in range(client_num_in_total)]
-        else:
-            num_clients = min(client_num_per_round, client_num_in_total)
-            np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
-            client_indexes = np.random.choice(range(client_num_in_total), num_clients, replace=False)
-        logging.info("client_indexes = %s" % str(client_indexes))
-        return client_indexes
 
     def _aggregate(self, w_locals):
         training_num = 0

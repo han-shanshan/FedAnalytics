@@ -20,11 +20,12 @@ FEDML_SIMULATION_TYPE_MPI = "MPI"
 FEDML_SIMULATION_TYPE_NCCL = "NCCL"
 
 # FedML data
-FEDML_DATA_CACHE_FOLDER = "fedml_data"
-FEDML_DATA_MNIST_URL = "https://fedcv.s3.us-west-1.amazonaws.com/MNIST.zip"
+FA_DATA_CACHE_FOLDER = "data"
+FA_DATA_TWITTER_Sentiment140_URL = "http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip"
 
 # task
 FA_TASK_AVG = "AVG"
+FA_TASK_HEAVY_HITTER_TRIEHH = "heavy_hitter"
 
 
 

@@ -1,8 +1,3 @@
-# Install FedML
-```
-pip install fedml
-```
-
 # Run the example (one line API)
 ```
 python torch_fedavg_mnist_lr_one_line_example.py --cf fedml_config.yaml
