@@ -25,6 +25,6 @@ class Client:
         self.model_trainer.set_model_params(w_global)
         idxs = np.random.choice(range(len(self.local_training_data)), self.local_sample_number, replace=False)
         train_data = [self.local_training_data[i] for i in idxs]
-        print(f"train data = {train_data}")
+        # print(f"train data = {train_data}")
         self.model_trainer.train(train_data, self.args)
         return self.model_trainer.get_model_params()

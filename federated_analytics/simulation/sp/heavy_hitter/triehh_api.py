@@ -42,7 +42,7 @@ class TrieHHAPI(object):
         self._setup_clients(
             local_datasize_dict, train_data_local_dict, self.model_trainer,
         )
-        self.w_global = Trie()  # self.trie = {}
+        self.w_global = {}  # self.trie = {}
         self.total_sample_num = 0
 
         self._set_theta()
@@ -106,9 +106,11 @@ class TrieHHAPI(object):
             print(f"round_idx={round_idx}, aggregation result = {self.w_global}")
 
     def _aggregate(self, w_locals):
+        print(f"previous w_local_len={len(w_locals)}")
         if (len(w_locals) > self.batch_size):
             idxs = np.random.choice(range(len(w_locals)), self.batch_size, replace=False)
             w_locals = [w_locals[i] for i in idxs]
+        print(f"len = {len(w_locals)}, w_locals={w_locals}")
         while True:
             votes = defaultdict(int)
             """notes from the author of the paper: 
@@ -116,6 +118,7 @@ class TrieHHAPI(object):
             # one client update (i.e. return 1 vote from 1 chosen client).
             # Then you can have an outer for loop that iterates over chosen clients
             # and calls self.client_update() for each chosen and accumulates the votes."""
+
             for word in w_locals:
                 vote_result = self.client_vote(word, self.round_counter)
                 if vote_result > 0:
@@ -148,11 +151,12 @@ class TrieHHAPI(object):
 
     def print_heavy_hitters(self):
         heavy_hitters = []
-        raw_result = self.w_global.keys()
-        results = []
-        for word in raw_result:
-            if word[-1:] == '$':
-                results.append(word.rstrip('$'))
-        print(f'Discovered {len(results)} heavy hitters in run #{self.round_counter + 1}')
-        print(results)
-        heavy_hitters.append(results)
+        print(f"self.w_global = {self.w_global}")
+        # raw_result = self.w_global.keys()
+        # results = []
+        # for word in raw_result:
+        #     if word[-1:] == '$':
+        #         results.append(word.rstrip('$'))
+        # print(f'Discovered {len(results)} heavy hitters in run #{self.round_counter + 1}')
+        # print(results)
+        # heavy_hitters.append(results)

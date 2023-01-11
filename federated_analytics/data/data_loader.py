@@ -98,7 +98,7 @@ def load_synthetic_data(args):
             train_data_local_num_dict,
             local_data_dict,
         ]
-        print(f"datasize, train_data_local_num_dict, local_data_dict,{dataset}")
+        # print(f"datasize, train_data_local_num_dict, local_data_dict,{dataset}")
     elif dataset_name == "twitter":
         path = os.path.abspath(os.getcwd() + '../../../federated_analytics/' + args.data_cache_dir + '/twitter_Sentiment140/')
         download_twitter_Sentiment140(data_cache_dir=path)
@@ -114,7 +114,7 @@ def load_synthetic_data(args):
             train_data_local_num_dict,
             local_data_dict,
         ]
-        print(f"datasize, train_data_local_num_dict, local_data_dict,{dataset}")
+        # print(f"datasize, train_data_local_num_dict, local_data_dict,{dataset}")
     else:
         raise "Not Implemented Error"
     return dataset
