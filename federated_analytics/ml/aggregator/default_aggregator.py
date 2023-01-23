@@ -1,4 +1,4 @@
-from ...core.alg_frame.server_aggregator import ServerAggregator
+from ...core.frame.server_aggregator import ServerAggregator
 
 
 class DefaultServerAggregator(ServerAggregator):
