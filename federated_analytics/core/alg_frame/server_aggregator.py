@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from collections import OrderedDict
 from typing import List, Tuple
 from ...ml.aggregator.agg_operator import FedMLAggOperator
 
@@ -25,12 +24,12 @@ class ServerAggregator(ABC):
         pass
 
     def on_before_aggregation(
-            self, raw_client_model_or_grad_list: List[Tuple[float, OrderedDict]]
+            self, raw_client_value_list: List[Tuple[float, float]]
     ):
-        return raw_client_model_or_grad_list
+        return raw_client_value_list
 
-    def aggregate(self, raw_client_model_or_grad_list: List[Tuple[float, OrderedDict]]):
-        return FedMLAggOperator.agg(self.args, raw_client_model_or_grad_list)
+    def aggregate(self, raw_client_value_list: List[Tuple[float, float]]):
+        return FedMLAggOperator.agg(self.args, raw_client_value_list)
 
-    def on_after_aggregation(self, aggregated_model_or_grad: OrderedDict) -> OrderedDict:
-        return aggregated_model_or_grad
+    def on_after_aggregation(self, aggregated_value: float) -> float:
+        return aggregated_value

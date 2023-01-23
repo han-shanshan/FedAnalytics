@@ -28,3 +28,9 @@ class Client:
         # print(f"train data = {train_data}")
         self.model_trainer.train(train_data, self.args)
         return self.model_trainer.get_model_params()
+
+
+if __name__ == '__main__':
+    file = open("file.txt", "r")
+    lines = [line.strip() for line in file]
+    print(lines)
