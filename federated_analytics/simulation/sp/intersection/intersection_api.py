@@ -6,6 +6,32 @@ from .client import Client
 from ...utils import client_sampling
 
 
+def get_intersection_of_two_lists_keep_duplicates(list1, list2):
+    """
+    Keep duplicates in the intersection, e.g., list1=[1,2,3,2,3], list2=[2,3,2,3]. intersect(list1, list2) = [2,3,2,3]
+    :param list1: first list
+    :param list2: second list
+    :return: intersection of the 2 lists
+    """
+    intersection = []
+    for i in range(len(list1)):
+        for j in range(len(list2) - 1, -1, -1):
+            if list1[i] == list2[j]:
+                intersection.append(list2[j])
+                list2.remove(j)
+    return intersection
+
+
+def get_intersection_of_two_lists_remove_duplicates(list1, list2):
+    """
+    Remove duplicates in the intersection, e.g., list1=[1,2,3,2,3], list2=[2,3,2,3]. intersect(list1, list2) = [2,3]
+    :param list1: first list
+    :param list2: second list
+    :return: intersection of the 2 lists
+    """
+    return list(set(list1) & set(list2))
+
+
 class IntersectionSimulator(object):
     def __init__(self, args, dataset):
         self.args = args
@@ -70,13 +96,14 @@ class IntersectionSimulator(object):
                 w = client.train(w_global=None)
                 w_locals.append((client.get_sample_number(), w))
             self.w_global = self._aggregate(w_locals)
-            print(f"round_idx={round_idx}, aggregation result = {self.w_global}, cardinality = {self.get_cardinality()}")
+            print(
+                f"round_idx={round_idx}, aggregation result = {self.w_global}, cardinality = {self.get_cardinality()}")
 
     def _aggregate(self, w_locals):
         (sample_num, param) = w_locals[0]
         for i in range(0, len(w_locals)):
             _, local_model_params = w_locals[i]
-            param = list(set(param) & set(local_model_params))
+            param = get_intersection_of_two_lists_remove_duplicates(local_model_params, param)
         return param
 
     def get_cardinality(self):

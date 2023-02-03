@@ -6,6 +6,32 @@ from .client import Client
 from ...utils import client_sampling
 
 
+def get_union_of_two_lists_keep_duplicates(list1, list2):
+    """
+    Keep duplicates in the union, e.g., list1=[1,2,3,2,3], list2=[2,3,2,3]. intersect(list1, list2) = [1,2,3,2,3]
+    :param list1: first list
+    :param list2: second list
+    :return: intersection of the 2 lists
+    """
+    union = []
+    for item in list1:
+        union.append(item)
+        if item in list2:
+            list2.remove(list2.index(item))
+    union.extend(list2)
+    return union
+
+
+def get_union_of_two_lists_remove_duplicates(list1, list2):
+    """
+    Remove duplicates in the union, e.g., list1=[1,2,3,2,3], list2=[2,3,2,3]. intersect(list1, list2) = [1,2,3]
+    :param list1: first list
+    :param list2: second list
+    :return: intersection of the 2 lists
+    """
+    return list(set(list1 + list2))
+
+
 class UnionSimulator(object):
     def __init__(self, args, dataset):
         self.args = args
@@ -77,5 +103,5 @@ class UnionSimulator(object):
         (sample_num, param) = w_locals[0]
         for i in range(0, len(w_locals)):
             _, local_model_params = w_locals[i]
-            param = list(set(param + local_model_params))
+            param = get_union_of_two_lists_remove_duplicates(param, local_model_params)
         return param

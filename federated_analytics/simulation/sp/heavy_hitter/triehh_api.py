@@ -5,10 +5,12 @@ from federated_analytics.ml.trainer.trainer_creator import create_model_trainer
 from .client import Client
 from collections import defaultdict
 import numpy as np
-
 from ...utils import client_sampling
 
-
+"""
+Federated Heavy Hitters Discovery with Differential Privacy: https://arxiv.org/pdf/1902.08534.pdf
+reference: https://github.com/google-research/federated/tree/master/triehh
+"""
 class TrieHHSimulator(object):
     def __init__(self, args=None, dataset=None):
         if hasattr(args, "max_word_len"):

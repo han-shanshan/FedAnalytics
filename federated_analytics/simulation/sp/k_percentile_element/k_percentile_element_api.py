@@ -1,10 +1,18 @@
 import logging
 import random
-
 from federated_analytics.constants import FA_TASK_K_PERCENTILE_ELEMENT
 from federated_analytics.ml.trainer.trainer_creator import create_model_trainer
 from .client import Client
 from ...utils import client_sampling
+
+
+"""
+Step:
+1. Set flag value, e.g., the initial value of the k percentile element. If the user has some information about the dataset,
+e.g., knowing the average value, the user can pass the value as a parameter. Otherwise, the flag is set to 100
+2. in iteration, the server sends the flag to each client to count the number of values that are larger than the flag.
+If exactly = k%, done; otherwise, update the value of flag.
+"""
 
 
 class KPercentileElementSimulator(object):
@@ -26,12 +34,17 @@ class KPercentileElementSimulator(object):
         self._setup_clients(
             local_datasize_dict, train_data_local_dict, self.model_trainer,
         )
-        self.w_global = 100
+
         self.quit = False
         self.total_sample_num = 0
         self.k_percentage_numbers = int(self.train_data_num_in_total * args.k / 100)
         # self.flag = 100
-        self.previous_w_global = 100
+        if hasattr(args, "flag"):
+            self.w_global = args.flag
+            self.previous_w_global = args.flag
+        else:
+            self.w_global = 100
+            self.previous_w_global = 100
         if hasattr(args, "use_all_data") and args.use_all_data in [False]:
             self.use_all_data = False  # in each iteration, each client randomly sample some data to compute
         else:
