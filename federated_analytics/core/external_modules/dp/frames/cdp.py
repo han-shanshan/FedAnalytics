@@ -1,5 +1,5 @@
-from federated_analytics.core.dp.frames.base_dp_solution import BaseDPFrame
-from federated_analytics.core.dp.mechanisms.dp_mechanism import DPMechanism
+from federated_analytics.core.external_modules.dp.frames.base_dp_solution import BaseDPFrame
+from federated_analytics.core.external_modules.dp.mechanisms.dp_mechanism import DPMechanism
 
 
 class GlobalDP(BaseDPFrame):

@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import List, Tuple
-from federated_analytics.core.dp.mechanisms.dp_mechanism import DPMechanism
+from federated_analytics.core.external_modules.dp.mechanisms.dp_mechanism import DPMechanism
 
 
 class BaseDPFrame(ABC):

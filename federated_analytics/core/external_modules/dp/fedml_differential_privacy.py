@@ -1,10 +1,9 @@
 import logging
-from collections import OrderedDict
 from typing import List, Tuple
 
-from federated_analytics.core.dp.common.constants import DP_LDP, DP_CDP
-from federated_analytics.core.dp.frames.cdp import GlobalDP
-from federated_analytics.core.dp.frames.ldp import LocalDP
+from federated_analytics.core.external_modules.dp.common.constants import DP_LDP, DP_CDP
+from federated_analytics.core.external_modules.dp.frames.cdp import GlobalDP
+from federated_analytics.core.external_modules.dp.frames.ldp import LocalDP
 
 
 class FedMLDifferentialPrivacy:

@@ -1,4 +1,4 @@
-from ...core.frame.server_aggregator import ServerAggregator
+from federated_analytics.core.base_frame.server_aggregator import ServerAggregator
 
 
 class DefaultServerAggregator(ServerAggregator):

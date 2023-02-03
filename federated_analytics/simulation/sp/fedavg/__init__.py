@@ -1,1 +1,1 @@
-from .fedavg_api import FedAvgAPI
+from .fedavg_api import FedAvgSimulator

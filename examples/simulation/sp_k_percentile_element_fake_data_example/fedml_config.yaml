@@ -1,0 +1,21 @@
+common_args:
+  training_type: "simulation"
+  random_seed: 0
+
+data_args:
+  dataset: "fake"
+  data_cache_dir: /data
+
+train_args:
+  client_num_in_total: 10
+  client_num_per_round: 4
+  comm_round: 20
+
+comm_args:
+  backend: "sp"
+
+task_args:
+  task: "k_percentile"
+  k: 20   # 0<k<100
+  use_all_data: False
+

@@ -17,7 +17,6 @@ FEDML_CROSS_SILO_SCENARIO_HIERARCHICAL = "hierarchical"
 # FedML SIMULATION TYPE
 FEDML_SIMULATION_TYPE_SP = "sp"
 FEDML_SIMULATION_TYPE_MPI = "MPI"
-FEDML_SIMULATION_TYPE_NCCL = "NCCL"
 
 # FedML data
 FA_DATA_CACHE_FOLDER = "data"
@@ -26,6 +25,9 @@ FA_DATA_TWITTER_Sentiment140_URL = "http://cs.stanford.edu/people/alecmgo/traini
 # task
 FA_TASK_AVG = "AVG"
 FA_TASK_HEAVY_HITTER_TRIEHH = "heavy_hitter"
-
+FA_TASK_UNION = "union"
+FA_TASK_K_PERCENTILE_ELEMENT = "k_percentile"
+FA_TASK_INTERSECTION = "intersection"
+FA_TASK_CARDINALITY = "cardinality"
 
 

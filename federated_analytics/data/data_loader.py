@@ -18,7 +18,7 @@ def generate_fake_data(data_cache_dir):
 
     if not os.path.exists(file_path):
         f = open(file_path, "a")
-        for i in range(100):
+        for i in range(10000):
             f.write(f"{random.randint(1, 100)}\n")
         f.close()
 

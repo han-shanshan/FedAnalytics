@@ -1,25 +1,12 @@
 import logging
 import random
-from federated_analytics.constants import FA_TASK_AVG
+from federated_analytics.constants import FA_TASK_UNION
 from federated_analytics.ml.trainer.trainer_creator import create_model_trainer
 from .client import Client
 from ...utils import client_sampling
 
-""" todo: 
-Mode 1: (online mode) each client stores its AVG result and the total number of data being sampled so far; 
-later computation will use this result.
-Mode 2: (offline mode, no need to use iterations) clients do not store previous results; 
-server collects results from clients and does a weighted avg each round.
-Finally, server does a weighted avg for all rounds.
-Mode 3: (online mode, server does not need to store avg results for each rounds, the clients do not store their answers) 
-similar to fl, the server sends the AVG result & total sample num so far to each client; 
-(or, AVG result + cdp && a fake total sample num, the server can do further computation to get the real answer)
-Mode 4: (online mode) server sets 2 local var: avg and total sample num. The server collects answers from clients each round and compute AVG
-using avg, total sample num, and training num of the current round
-"""
 
-
-class FedAvgSimulator(object):
+class IntersectionSimulator(object):
     def __init__(self, args, dataset):
         self.args = args
         [
@@ -32,11 +19,11 @@ class FedAvgSimulator(object):
         self.client_list = []
         self.local_datasize_dict = local_datasize_dict
         self.train_data_local_dict = train_data_local_dict
-        self.model_trainer = create_model_trainer(FA_TASK_AVG, args)
+        self.model_trainer = create_model_trainer(FA_TASK_UNION, args)
         self._setup_clients(
             local_datasize_dict, train_data_local_dict, self.model_trainer,
         )
-        self.w_global = 0.0
+        self.w_global = []
         self.total_sample_num = 0
 
     def _setup_clients(
@@ -72,7 +59,6 @@ class FedAvgSimulator(object):
             for i in client_indexes:
                 local_sample_num[i] = random.randint(1, self.local_datasize_dict[i])
 
-            # logging.info("client_indexes = " + str(client_indexes))
             for idx, client in enumerate(self.client_list):
                 # update dataset
                 client_idx = client_indexes[idx]
@@ -81,28 +67,17 @@ class FedAvgSimulator(object):
                     self.train_data_local_dict[client_idx],
                     local_sample_num[client_idx]
                 )
-                # train on new dataset
                 w = client.train(w_global=None)
                 w_locals.append((client.get_sample_number(), w))
-            # update global weights
             self.w_global = self._aggregate(w_locals)
-            print(f"round_idx={round_idx}, aggregation result = {self.w_global}")
+            print(f"round_idx={round_idx}, aggregation result = {self.w_global}, cardinality = {self.get_cardinality()}")
 
     def _aggregate(self, w_locals):
-        training_num = 0
-        for idx in range(len(w_locals)):
-            (sample_num, averaged_params) = w_locals[idx]
-            training_num += sample_num
-
-        (sample_num, averaged_params) = w_locals[0]
+        (sample_num, param) = w_locals[0]
         for i in range(0, len(w_locals)):
-            local_sample_number, local_model_params = w_locals[i]
-            w = local_sample_number / training_num
-            if i == 0:
-                averaged_params = local_model_params * w
-            else:
-                averaged_params += local_model_params * w
-        self.total_sample_num += training_num
-        averaged_params = averaged_params * (training_num / self.total_sample_num) + self.w_global * (
-                    (self.total_sample_num - training_num) / self.total_sample_num)
-        return averaged_params
+            _, local_model_params = w_locals[i]
+            param = list(set(param) & set(local_model_params))
+        return param
+
+    def get_cardinality(self):
+        return len(self.w_global)

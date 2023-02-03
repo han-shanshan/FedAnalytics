@@ -2,7 +2,6 @@ import logging
 import math
 from federated_analytics.constants import FA_TASK_HEAVY_HITTER_TRIEHH
 from federated_analytics.ml.trainer.trainer_creator import create_model_trainer
-from federated_analytics.utils.trie import Trie
 from .client import Client
 from collections import defaultdict
 import numpy as np
@@ -10,7 +9,7 @@ import numpy as np
 from ...utils import client_sampling
 
 
-class TrieHHAPI(object):
+class TrieHHSimulator(object):
     def __init__(self, args=None, dataset=None):
         if hasattr(args, "max_word_len"):
             self.MAX_L = args.max_word_len
@@ -133,6 +132,10 @@ class TrieHHAPI(object):
         if len(word) < r:
             return 0
         pre = word[0:r - 1]
+        # print(f"self.w_global={self.w_global}")
+        # print(f"pre = {pre}, type={type(self.w_global)}")
+        if self.w_global is None:
+            return 1
         if pre and (pre not in self.w_global):
             return 0
         return 1

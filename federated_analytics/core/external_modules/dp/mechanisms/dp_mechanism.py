@@ -1,4 +1,4 @@
-from federated_analytics.core.dp.mechanisms import Laplace, Gaussian
+from federated_analytics.core.external_modules.dp.mechanisms import Laplace, Gaussian
 
 """dp mechanisms, e.g., Gaussian, Laplace """
 
