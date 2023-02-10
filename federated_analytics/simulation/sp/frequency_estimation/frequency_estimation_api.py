@@ -26,6 +26,7 @@ class FrequencyEstimationSimulator(object):
         )
         self.w_global = dict()
         self.total_sample_num = 0
+        self.total_round = args.comm_round
 
     def _setup_clients(
             self, local_datasize_dict, train_data_local_dict, model_trainer,
@@ -71,8 +72,9 @@ class FrequencyEstimationSimulator(object):
                 w_locals.append((client.get_sample_number(), w))
             # update global weights
             self.w_global = self._aggregate(w_locals)
-            self.print_frequency_estimation_results()
             print(f"round_idx={round_idx}, aggregation result = {self.w_global}")
+            if round_idx == self.total_round - 1:
+                self.print_frequency_estimation_results()
 
     def _aggregate(self, w_locals):
         training_num = 0
