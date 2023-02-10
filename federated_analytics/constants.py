@@ -30,5 +30,6 @@ FA_TASK_K_PERCENTILE_ELEMENT = "k_percentile"
 FA_TASK_INTERSECTION = "intersection"
 FA_TASK_CARDINALITY = "cardinality"
 FA_TASK_FREQ = "freq"
+FA_TASK_HISTOGRAM = "histogram"
 
 

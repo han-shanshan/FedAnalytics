@@ -4,6 +4,7 @@ from federated_analytics.constants import FA_TASK_FREQ
 from federated_analytics.ml.trainer.trainer_creator import create_model_trainer
 from .client import Client
 from ...utils import client_sampling
+import matplotlib.pyplot as plt
 
 
 class FrequencyEstimationSimulator(object):
@@ -94,3 +95,8 @@ class FrequencyEstimationSimulator(object):
         print("frequency estimation: ")
         for key in self.w_global:
             print(f"key = {key}, freq = {self.w_global[key] / self.total_sample_num}")
+        plt.bar(self.w_global.keys(), self.w_global.values(), align='center')
+        plt.xlabel('Keys')
+        plt.ylabel('Occurrence # ')
+        plt.title('Histogram')
+        plt.show()

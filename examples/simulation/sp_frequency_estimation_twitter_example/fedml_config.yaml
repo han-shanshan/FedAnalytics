@@ -3,7 +3,7 @@ common_args:
   random_seed: 0
 
 data_args:
-  dataset: "twitter"
+  dataset: "fake"
   data_cache_dir: /data
 
 train_args:
