@@ -1,0 +1,17 @@
+common_args:
+  training_type: "simulation"
+  random_seed: 0
+
+data_args:
+  dataset: "twitter"
+  data_cache_dir: /data
+
+train_args:
+  client_num_in_total: 10
+  client_num_per_round: 4
+  comm_round: 10
+  task: "freq"
+
+comm_args:
+  backend: "sp"
+

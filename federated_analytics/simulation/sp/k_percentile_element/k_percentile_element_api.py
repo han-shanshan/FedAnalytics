@@ -12,6 +12,8 @@ Step:
 e.g., knowing the average value, the user can pass the value as a parameter. Otherwise, the flag is set to 100
 2. in iteration, the server sends the flag to each client to count the number of values that are larger than the flag.
 If exactly = k%, done; otherwise, update the value of flag.
+
+todo: median: http://proceedings.mlr.press/v80/yin18a/yin18a.pdf; geometric median
 """
 
 

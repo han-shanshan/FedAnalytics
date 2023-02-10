@@ -1,9 +1,10 @@
+from .sp.frequency_estimation.frequency_estimation_api import FrequencyEstimationSimulator
 from .sp.heavy_hitter.triehh_api import TrieHHSimulator
 from .sp.intersection.intersection_api import IntersectionSimulator
 from .sp.k_percentile_element.k_percentile_element_api import KPercentileElementSimulator
 from .sp.union.union_api import UnionSimulator
 from ..constants import FA_TASK_AVG, FA_TASK_HEAVY_HITTER_TRIEHH, FA_TASK_UNION, FA_TASK_K_PERCENTILE_ELEMENT, \
-    FA_TASK_INTERSECTION, FA_TASK_CARDINALITY
+    FA_TASK_INTERSECTION, FA_TASK_CARDINALITY, FA_TASK_FREQ
 from ..core import ClientTrainer, ServerAggregator
 
 
@@ -20,6 +21,8 @@ class SimulatorSingleProcess:
             self.fl_trainer = KPercentileElementSimulator(args, dataset)
         elif args.task == FA_TASK_INTERSECTION or args.task == FA_TASK_CARDINALITY:
             self.fl_trainer = IntersectionSimulator(args, dataset)
+        elif args.task == FA_TASK_FREQ:
+            self.fl_trainer = FrequencyEstimationSimulator(args, dataset)
         else:
             raise Exception("Exception")
 

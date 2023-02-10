@@ -29,5 +29,6 @@ FA_TASK_UNION = "union"
 FA_TASK_K_PERCENTILE_ELEMENT = "k_percentile"
 FA_TASK_INTERSECTION = "intersection"
 FA_TASK_CARDINALITY = "cardinality"
+FA_TASK_FREQ = "freq"
 
 
