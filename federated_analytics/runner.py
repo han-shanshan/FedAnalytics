@@ -4,7 +4,7 @@ from .constants import (
 )
 
 
-class FedMLRunner:
+class FARunner:
     def __init__(
         self,
         args,

@@ -1,5 +1,5 @@
 from . import init, data
-from .runner import FedMLRunner
+from .runner import FARunner
 from .constants import (
     FEDML_SIMULATION_TYPE_SP,
 )
@@ -17,6 +17,6 @@ def run_simulation(backend=FEDML_SIMULATION_TYPE_SP):
     dataset, output_dim = data.load(args)  # todo
 
     # start training
-    fedml_runner = FedMLRunner(args, dataset)
+    fedml_runner = FARunner(args, dataset)
     fedml_runner.run()
 

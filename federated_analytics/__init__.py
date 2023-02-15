@@ -31,11 +31,11 @@ def init_simulation_sp(args):
 
 
 from .launch_simulation import run_simulation
-from .runner import FedMLRunner
+from .runner import FARunner
 
 __all__ = [
     "data",
-    "FedMLRunner",
+    "FARunner",
     "run_simulation",
     "init"
 ]
