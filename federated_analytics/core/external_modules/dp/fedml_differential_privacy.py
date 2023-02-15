@@ -58,8 +58,8 @@ class FedMLDifferentialPrivacy:
             raise Exception("dp solution is not initialized!")
         return self.dp_solution.add_global_noise(aggr_val)
 
-    def set_params_for_dp(self, raw_client_value_list: List[Tuple[float, float]]):
+    def set_params_for_dp(self, local_submissions: List[Tuple[float, float]]):
         if self.dp_solution is None:
             raise Exception("dp solution is not initialized!")
-        self.dp_solution.set_params_for_dp(raw_client_value_list)
+        self.dp_solution.set_params_for_dp(local_submissions)
 

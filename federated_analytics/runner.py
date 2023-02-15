@@ -2,7 +2,6 @@ from .constants import (
     FEDML_TRAINING_PLATFORM_SIMULATION,
     FEDML_SIMULATION_TYPE_SP,
 )
-from .core import ClientTrainer, ServerAggregator
 
 
 class FedMLRunner:
@@ -27,11 +26,9 @@ class FedMLRunner:
         self, args, dataset, client_trainer=None, server_aggregator=None
     ):
         if hasattr(args, "backend") and args.backend == FEDML_SIMULATION_TYPE_SP:
-            from .simulation.simulator import SimulatorSingleProcess
+            from federated_analytics.simulation.sp.simulator import SimulatorSingleProcess
 
-            runner = SimulatorSingleProcess(
-                args, dataset, client_trainer, server_aggregator
-            )
+            runner = SimulatorSingleProcess(args, dataset)
         else:
             raise Exception("not such backend {}".format(args.backend))
 

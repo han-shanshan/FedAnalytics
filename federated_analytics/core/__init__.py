@@ -1,11 +1,7 @@
-from federated_analytics.core.base_frame.client_trainer import ClientTrainer
+from federated_analytics.core.base_frame.client_analyzer import ClientAnalyzer
 from federated_analytics.core.base_frame.server_aggregator import ServerAggregator
-from .distributed.fedml_comm_manager import FedMLCommManager
-from ..ml.aggregator.agg_operator import FedMLAggOperator
 
 __all__ = [
-    "ClientTrainer",
+    "ClientAnalyzer",
     "ServerAggregator",
-    "FedMLAggOperator",
-    "FedMLCommManager",
 ]

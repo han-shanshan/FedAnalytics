@@ -1,7 +1,7 @@
 import logging
 import random
 from federated_analytics.constants import FA_TASK_FREQ
-from federated_analytics.ml.trainer.trainer_creator import create_model_trainer
+from federated_analytics.FA_components.local_analyzer.client_analyzer_creator import create_local_analyzer
 from .client import Client
 from ...utils import client_sampling
 import matplotlib.pyplot as plt
@@ -20,16 +20,16 @@ class FrequencyEstimationSimulator(object):
         self.client_list = []
         self.local_datasize_dict = local_datasize_dict
         self.train_data_local_dict = train_data_local_dict
-        self.model_trainer = create_model_trainer(FA_TASK_FREQ, args)
+        self.local_analyzer = create_local_analyzer(FA_TASK_FREQ, args)
         self._setup_clients(
-            local_datasize_dict, train_data_local_dict, self.model_trainer,
+            local_datasize_dict, train_data_local_dict, self.local_analyzer,
         )
         self.w_global = dict()
         self.total_sample_num = 0
         self.total_round = args.comm_round
 
     def _setup_clients(
-            self, local_datasize_dict, train_data_local_dict, model_trainer,
+            self, local_datasize_dict, train_data_local_dict, local_analyzer,
     ):
         logging.info("############setup_clients (START)#############")
         for client_idx in range(self.args.client_num_per_round):
@@ -38,13 +38,13 @@ class FrequencyEstimationSimulator(object):
                 train_data_local_dict[client_idx],
                 local_datasize_dict[client_idx],
                 self.args,
-                model_trainer,
+                local_analyzer,
             )
             self.client_list.append(c)
         logging.info("############setup_clients (END)#############")
 
     def train(self):
-        logging.info("self.model_trainer = {}".format(self.model_trainer))
+        logging.info("self.local_analyzer = {}".format(self.local_analyzer))
         local_sample_num = dict()
         for round_idx in range(self.args.comm_round):
             logging.info("################Communication round : {}".format(round_idx))
@@ -68,7 +68,7 @@ class FrequencyEstimationSimulator(object):
                     local_sample_num[client_idx]
                 )
                 # train on new dataset
-                w = client.train(w_global=None)
+                w = client.local_analyze(w_global=None)
                 w_locals.append((client.get_sample_number(), w))
             # update global weights
             self.w_global = self._aggregate(w_locals)

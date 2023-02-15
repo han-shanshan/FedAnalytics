@@ -1,16 +1,13 @@
 import logging
 import random
 
-from federated_analytics.FA_components.aggregator.FedAVGAggregator import FedAVGAggregator
+from federated_analytics.simulation.sp.client import Client
+from federated_analytics.FA_components.aggregator.global_analyzer_creator import create_global_analyzer
 from federated_analytics.FA_components.local_analyzer.client_analyzer_creator import create_local_analyzer
-from federated_analytics.constants import FA_TASK_AVG
-from .client import Client
-from ...utils import client_sampling
+from federated_analytics.simulation.utils import client_sampling
 
 
-
-
-class FedAvgSimulator(object):
+class SimulatorSingleProcess:
     def __init__(self, args, dataset):
         self.args = args
         [
@@ -24,11 +21,10 @@ class FedAvgSimulator(object):
         self.local_datasize_dict = local_datasize_dict
         self.train_data_local_dict = train_data_local_dict
         self.local_analyzer = create_local_analyzer(args)
+        self.aggregator = create_global_analyzer(args)
         self._setup_clients(
             local_datasize_dict, train_data_local_dict, self.local_analyzer,
         )
-        self.aggregator = FedAVGAggregator(args)
-
 
     def _setup_clients(
             self, local_datasize_dict, train_data_local_dict, local_analyzer,
@@ -45,7 +41,7 @@ class FedAvgSimulator(object):
             self.client_list.append(c)
         logging.info("############setup_clients (END)#############")
 
-    def train(self):
+    def analyze(self):
         logging.info("self.local_analyzer = {}".format(self.local_analyzer))
         local_sample_num = dict()
         for round_idx in range(self.args.comm_round):
@@ -74,6 +70,24 @@ class FedAvgSimulator(object):
                 w = client.local_analyze(w_global=None)
                 w_locals.append((client.get_sample_number(), w))
             result = self.aggregator.aggregate(w_locals)
-            print(f"round_idx={round_idx}, aggregation result = {self.result}")
+            print(f"round_idx={round_idx}, aggregation result = {result}")
 
+    def run(self):
+        self.analyze()
 
+        # def __init__(self, args, dataset):
+        #     from .sp.fedavg import FedAvgSimulator
+        #     if args.task == FA_TASK_AVG:
+        #         self.fl_trainer = FedAvgSimulator(args, dataset)
+        #     elif args.task == FA_TASK_HEAVY_HITTER_TRIEHH:
+        #         self.fl_trainer = TrieHHSimulator(args, dataset)
+        #     elif args.task == FA_TASK_UNION:
+        #         self.fl_trainer = UnionSimulator(args, dataset)
+        #     elif args.task == FA_TASK_K_PERCENTILE_ELEMENT:
+        #         self.fl_trainer = KPercentileElementSimulator(args, dataset)
+        #     elif args.task == FA_TASK_INTERSECTION or args.task == FA_TASK_CARDINALITY:
+        #         self.fl_trainer = IntersectionSimulator(args, dataset)
+        #     elif args.task == FA_TASK_FREQ or args.task == FA_TASK_HISTOGRAM:
+        #         self.fl_trainer = FrequencyEstimationSimulator(args, dataset)
+        #     else:
+        #         raise Exception("Exception")
