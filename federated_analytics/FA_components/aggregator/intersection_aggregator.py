@@ -42,6 +42,7 @@ class IntersectionAggregator(ServerAggregator):
                 self.server_data = local_submission
             else:
                 self.server_data = get_intersection_of_two_lists_remove_duplicates(self.server_data, local_submission)
+        print(f"cardinality = {self.get_cardinality()}")
         return self.server_data
 
     def get_cardinality(self):

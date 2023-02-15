@@ -68,6 +68,7 @@ class HeavyHitterTriehhAggregator(ServerAggregator):
                 print("end of discovery")
                 break
         self.print_heavy_hitters()
+        return self.w_global
 
     def _set_theta(self):
         theta = 5  # initial guess
