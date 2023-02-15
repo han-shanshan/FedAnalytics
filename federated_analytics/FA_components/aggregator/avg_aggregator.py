@@ -1,14 +1,15 @@
 from federated_analytics.core import ServerAggregator
-from typing import List, Tuple
+from typing import List, Tuple, Any
 
 
-class FedAVGAggregator(ServerAggregator):
+class AVGAggregator(ServerAggregator):
     def __init__(self, args):
         super().__init__(args)
         self.total_sample_num = 0
-        self.set_exchange_info(exchange_info=0)
+        self.set_server_data(server_data=0)
 
-    def aggregate(self, local_submission_list: List[Tuple[float, float]]):
+    def aggregate(self, local_submission_list: List[Tuple[float, Any]]):
+        print(f"local_submission_list={local_submission_list}")
         training_num = 0
         for idx in range(len(local_submission_list)):
             (sample_num, local_submission) = local_submission_list[idx]
@@ -23,9 +24,9 @@ class FedAVGAggregator(ServerAggregator):
             else:
                 avg += local_submission * w
         self.total_sample_num += training_num
-        avg = avg * (training_num / self.total_sample_num) + self.exchange_info * (
+        avg = avg * (training_num / self.total_sample_num) + self.server_data * (
                 (self.total_sample_num - training_num) / self.total_sample_num)
-        self.exchange_info = avg
+        self.server_data = avg
         return avg
 
 

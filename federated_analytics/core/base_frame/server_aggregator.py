@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List, Tuple
+from typing import List, Tuple, Any
 
 
 class ServerAggregator(ABC):
@@ -7,17 +7,16 @@ class ServerAggregator(ABC):
         self.id = 0
         self.args = args
         self.eval_data = None
-        self.exchange_info = None
+        self.server_data = None
 
     def set_id(self, aggregator_id):
         self.id = aggregator_id
 
-    def get_exchange_info(self):
-        return self.exchange_info
+    def get_server_data(self):
+        return self.server_data
 
-    def set_exchange_info(self, exchange_info):
-        self.exchange_info = exchange_info
+    def set_server_data(self, server_data):
+        self.server_data = server_data
 
-    def aggregate(self, local_submissions: List[Tuple[float, float]]):
-        # return FAAggOperator.agg(self.args, local_submissions)
+    def aggregate(self, local_submissions: List[Tuple[float, Any]]):
         pass

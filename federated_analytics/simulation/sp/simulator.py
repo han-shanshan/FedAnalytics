@@ -1,6 +1,5 @@
 import logging
 import random
-
 from federated_analytics.simulation.sp.client import Client
 from federated_analytics.FA_components.aggregator.global_analyzer_creator import create_global_analyzer
 from federated_analytics.FA_components.local_analyzer.client_analyzer_creator import create_local_analyzer
@@ -21,7 +20,7 @@ class SimulatorSingleProcess:
         self.local_datasize_dict = local_datasize_dict
         self.train_data_local_dict = train_data_local_dict
         self.local_analyzer = create_local_analyzer(args)
-        self.aggregator = create_global_analyzer(args)
+        self.aggregator = create_global_analyzer(args, train_data_num)
         self._setup_clients(
             local_datasize_dict, train_data_local_dict, self.local_analyzer,
         )
@@ -46,7 +45,7 @@ class SimulatorSingleProcess:
         local_sample_num = dict()
         for round_idx in range(self.args.comm_round):
             logging.info("################Communication round : {}".format(round_idx))
-            w_locals = []
+            client_submission_list = []
 
             """
             for scalability: following the original FedAvg algorithm, we uniformly sample a fraction of clients in each round.
@@ -58,6 +57,7 @@ class SimulatorSingleProcess:
             print(f"self.local_datasize_dict={self.local_datasize_dict}, local_sample_num={local_sample_num}")
             for i in client_indexes:
                 local_sample_num[i] = random.randint(1, self.local_datasize_dict[i])
+                #     todo: add sample mode
 
             for idx, client in enumerate(self.client_list):
                 # update dataset
@@ -67,27 +67,10 @@ class SimulatorSingleProcess:
                     self.train_data_local_dict[client_idx],
                     local_sample_num[client_idx]
                 )
-                w = client.local_analyze(w_global=None)
-                w_locals.append((client.get_sample_number(), w))
-            result = self.aggregator.aggregate(w_locals)
+                client_submission = client.local_analyze(w_global=self.aggregator.get_server_data())
+                client_submission_list.append((client.get_sample_number(), client_submission))
+            result = self.aggregator.aggregate(client_submission_list)
             print(f"round_idx={round_idx}, aggregation result = {result}")
 
     def run(self):
         self.analyze()
-
-        # def __init__(self, args, dataset):
-        #     from .sp.fedavg import FedAvgSimulator
-        #     if args.task == FA_TASK_AVG:
-        #         self.fl_trainer = FedAvgSimulator(args, dataset)
-        #     elif args.task == FA_TASK_HEAVY_HITTER_TRIEHH:
-        #         self.fl_trainer = TrieHHSimulator(args, dataset)
-        #     elif args.task == FA_TASK_UNION:
-        #         self.fl_trainer = UnionSimulator(args, dataset)
-        #     elif args.task == FA_TASK_K_PERCENTILE_ELEMENT:
-        #         self.fl_trainer = KPercentileElementSimulator(args, dataset)
-        #     elif args.task == FA_TASK_INTERSECTION or args.task == FA_TASK_CARDINALITY:
-        #         self.fl_trainer = IntersectionSimulator(args, dataset)
-        #     elif args.task == FA_TASK_FREQ or args.task == FA_TASK_HISTOGRAM:
-        #         self.fl_trainer = FrequencyEstimationSimulator(args, dataset)
-        #     else:
-        #         raise Exception("Exception")

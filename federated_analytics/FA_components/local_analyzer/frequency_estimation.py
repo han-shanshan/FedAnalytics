@@ -2,12 +2,6 @@ from federated_analytics.core import ClientAnalyzer
 
 
 class FrequencyEstimationClientAnalyzer(ClientAnalyzer):
-    def get_exchange_info(self):
-        return self.answer
-
-    def set_exchange_info(self, model_parameters):
-        self.answer = model_parameters
-
     def local_analyze(self, train_data, args):
         counter_dict = dict()
 
@@ -16,4 +10,4 @@ class FrequencyEstimationClientAnalyzer(ClientAnalyzer):
                 counter_dict[value] = 1
             else:
                 counter_dict[value] = counter_dict[value] + 1
-        self.set_exchange_info(counter_dict)
+        self.set_client_submission(counter_dict)

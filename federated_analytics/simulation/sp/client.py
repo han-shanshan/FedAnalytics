@@ -22,9 +22,9 @@ class Client:
         return self.local_sample_number
 
     def local_analyze(self, w_global):
-        self.local_analyzer.set_exchange_info(w_global)
+        self.local_analyzer.set_server_data(w_global)
         idxs = np.random.choice(range(len(self.local_training_data)), self.local_sample_number, replace=False)
         train_data = [self.local_training_data[i] for i in idxs]
         # print(f"train data = {train_data}")
         self.local_analyzer.local_analyze(train_data, self.args)
-        return self.local_analyzer.get_exchange_info()
+        return self.local_analyzer.get_client_submission()

@@ -2,12 +2,6 @@ from federated_analytics.core import ClientAnalyzer
 
 
 class AverageClientAnalyzer(ClientAnalyzer):
-    def get_exchange_info(self):
-        return self.answer
-
-    def set_exchange_info(self, model_parameters):
-        self.answer = model_parameters
-
     def local_analyze(self, train_data, args):
         # print(f"self.local_sample_number = {self.local_sample_number}")
         sample_num = len(train_data)
@@ -20,4 +14,4 @@ class AverageClientAnalyzer(ClientAnalyzer):
         # print(f"{self.local_sample_number}, {train_data}")
         for value in train_data:
             average = average + value / sample_num
-        self.set_exchange_info(average)
+        self.set_client_submission(average)
