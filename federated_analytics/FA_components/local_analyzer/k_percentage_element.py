@@ -1,7 +1,7 @@
-from federated_analytics.core import ClientAnalyzer
+from federated_analytics.core import FAClientAnalyzer
 
 
-class KPercentileElementClientAnalyzer(ClientAnalyzer):
+class KPercentileElementClientAnalyzer(FAClientAnalyzer):
     def local_analyze(self, train_data, args):
         counter = 0
         for data in train_data:

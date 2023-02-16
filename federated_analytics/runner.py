@@ -26,9 +26,9 @@ class FARunner:
         self, args, dataset, client_trainer=None, server_aggregator=None
     ):
         if hasattr(args, "backend") and args.backend == FEDML_SIMULATION_TYPE_SP:
-            from federated_analytics.simulation.sp.simulator import SimulatorSingleProcess
+            from federated_analytics.simulation.sp.simulator import FASimulatorSingleProcess
 
-            runner = SimulatorSingleProcess(args, dataset)
+            runner = FASimulatorSingleProcess(args, dataset)
         else:
             raise Exception("not such backend {}".format(args.backend))
 

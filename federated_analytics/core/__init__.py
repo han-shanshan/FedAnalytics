@@ -1,7 +1,10 @@
-from federated_analytics.core.base_frame.client_analyzer import ClientAnalyzer
-from federated_analytics.core.base_frame.server_aggregator import ServerAggregator
+from federated_analytics.core.base_frame.client_analyzer import FAClientAnalyzer
+from federated_analytics.core.base_frame.server_aggregator import FAServerAggregator
+
 
 __all__ = [
-    "ClientAnalyzer",
-    "ServerAggregator",
+    "FAClientAnalyzer",
+    "FAServerAggregator",
 ]
+
+

@@ -1,4 +1,4 @@
-from federated_analytics.core import ClientAnalyzer
+from federated_analytics.core import FAClientAnalyzer
 
 """
 Federated Heavy Hitters with Differential Privacy. NeurIPS2019 
@@ -9,7 +9,7 @@ opensource:
 """
 
 
-class TrieHHClientAnalyzer(ClientAnalyzer):
+class TrieHHClientAnalyzer(FAClientAnalyzer):
     def local_analyze(self, train_data, args):
         self.set_client_submission(train_data)
 

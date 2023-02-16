@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-from federated_analytics.core import ServerAggregator
+from federated_analytics.core import FAServerAggregator
 from typing import List, Tuple, Any
 
 
@@ -29,7 +29,7 @@ def get_union_of_two_lists_remove_duplicates(list1, list2):
     return list(set(list1 + list2))
 
 
-class UnionAggregator(ServerAggregator):
+class UnionAggregatorFA(FAServerAggregator):
     def __init__(self, args):
         super().__init__(args)
         self.set_server_data(server_data=[])

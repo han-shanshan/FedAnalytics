@@ -1,7 +1,7 @@
-from federated_analytics.core import ClientAnalyzer
+from federated_analytics.core import FAClientAnalyzer
 
 
-class AverageClientAnalyzer(ClientAnalyzer):
+class AverageClientAnalyzer(FAClientAnalyzer):
     def local_analyze(self, train_data, args):
         # print(f"self.local_sample_number = {self.local_sample_number}")
         sample_num = len(train_data)

@@ -1,9 +1,9 @@
 from matplotlib import pyplot as plt
-from federated_analytics.core import ServerAggregator
+from federated_analytics.core import FAServerAggregator
 from typing import List, Tuple, Any
 
 
-class FrequencyEstimationAggregator(ServerAggregator):
+class FrequencyEstimationAggregatorFA(FAServerAggregator):
     def __init__(self, args):
         super().__init__(args)
         self.total_sample_num = 0

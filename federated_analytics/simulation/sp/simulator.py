@@ -6,7 +6,7 @@ from federated_analytics.FA_components.local_analyzer.client_analyzer_creator im
 from federated_analytics.simulation.utils import client_sampling
 
 
-class SimulatorSingleProcess:
+class FASimulatorSingleProcess:
     def __init__(self, args, dataset):
         self.args = args
         [

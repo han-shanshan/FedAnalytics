@@ -1,5 +1,5 @@
-from federated_analytics.simulation.sp.simulator import SimulatorSingleProcess
+from federated_analytics.simulation.sp.simulator import FASimulatorSingleProcess
 
 __all__ = [
-    "SimulatorSingleProcess",
+    "FASimulatorSingleProcess",
 ]

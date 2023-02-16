@@ -1,7 +1,7 @@
-from federated_analytics.core import ClientAnalyzer
+from federated_analytics.core import FAClientAnalyzer
 
 
-class FrequencyEstimationClientAnalyzer(ClientAnalyzer):
+class FrequencyEstimationClientAnalyzer(FAClientAnalyzer):
     def local_analyze(self, train_data, args):
         counter_dict = dict()
 

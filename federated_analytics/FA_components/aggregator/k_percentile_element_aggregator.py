@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-from federated_analytics.core import ServerAggregator
+from federated_analytics.core import FAServerAggregator
 from typing import List, Tuple, Any
 
 """
@@ -13,7 +13,7 @@ todo: median: http://proceedings.mlr.press/v80/yin18a/yin18a.pdf; geometric medi
 """
 
 
-class KPercentileElementAggregator(ServerAggregator):
+class KPercentileElementAggregatorFA(FAServerAggregator):
     def __init__(self, args, train_data_num):
         super().__init__(args)
         self.total_sample_num = 0

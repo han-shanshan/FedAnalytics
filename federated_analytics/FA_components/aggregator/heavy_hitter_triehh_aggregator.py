@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from collections import defaultdict
-from federated_analytics.core import ServerAggregator
+from federated_analytics.core import FAServerAggregator
 from typing import List, Tuple, Any
 
 """
@@ -10,7 +10,7 @@ reference: https://github.com/google-research/federated/tree/master/triehh
 """
 
 
-class HeavyHitterTriehhAggregator(ServerAggregator):
+class HeavyHitterTriehhAggregatorFA(FAServerAggregator):
     def __init__(self, args, train_data_num):
         super().__init__(args)
         if hasattr(args, "max_word_len"):

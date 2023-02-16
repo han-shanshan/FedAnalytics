@@ -1,8 +1,8 @@
-from federated_analytics.core import ServerAggregator
+from federated_analytics.core import FAServerAggregator
 from typing import List, Tuple, Any
 
 
-class AVGAggregator(ServerAggregator):
+class AVGAggregatorFA(FAServerAggregator):
     def __init__(self, args):
         super().__init__(args)
         self.total_sample_num = 0

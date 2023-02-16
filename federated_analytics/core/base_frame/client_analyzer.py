@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class ClientAnalyzer(ABC):
+class FAClientAnalyzer(ABC):
     def __init__(self, args):
         self.client_submission = 0
         self.id = 0

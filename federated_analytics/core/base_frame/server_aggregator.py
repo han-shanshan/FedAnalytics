@@ -2,7 +2,7 @@ from abc import ABC
 from typing import List, Tuple, Any
 
 
-class ServerAggregator(ABC):
+class FAServerAggregator(ABC):
     def __init__(self, args):
         self.id = 0
         self.args = args
